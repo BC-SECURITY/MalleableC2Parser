@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from pyparsing import *
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -21,7 +22,7 @@ class MalleableError(Exception):
         Raises:
             MalleableError: When called.
         """
-        raise(cls("%s::%s - %s" % (clss.__name__, func, message)))
+        raise cls
 
 class MalleableUtil(object):
     """Custom utility class used to provide helper functionality."""

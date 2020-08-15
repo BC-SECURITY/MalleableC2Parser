@@ -1,7 +1,9 @@
 
-import os, base64, urllib
+from __future__ import absolute_import
+import os, base64, six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 from pyparsing import *
-from utility import MalleableError, MalleableUtil, MalleableObject
+from .utility import MalleableError, MalleableUtil, MalleableObject
+from six.moves import range
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # TRANSFORMATION
@@ -100,10 +102,10 @@ class Transform(MalleableObject):
         Returns:
             dict (str, obj)
         """
-        return dict(super(Transform, self)._serialize().items() + {
+        return dict(list(super(Transform, self)._serialize().items()) + list({
             "type" : self.type,
             "arg" : self.arg if self.type != Transform.MASK else MalleableUtil.to_hex(self.arg[0])
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
@@ -174,7 +176,7 @@ class Transform(MalleableObject):
             MalleableError: If `string` is null.
         """
         if string is None:
-            MalleableError.throw(Transform.__class__, "append", "string argument must not be null")
+            MalleableError.throw(Transform.__class__("append").with_traceback("string argument must not be null"))
         self.transform = lambda data: data + string
         self.transform_r = lambda data: data[:-len(string)]
         self.generate_python = lambda var: "%(var)s+=b'%(string)s'\n" % {"var":var, "string":string}
@@ -193,8 +195,8 @@ class Transform(MalleableObject):
 
     def _base64url(self):
         """Configure the `base64url` Transform, which base64 encodes an arbitary input using url-safe characters."""
-        self.transform = lambda data: urllib.quote(base64.b64encode(data))
-        self.transform_r = lambda data: base64.b64decode(urllib.unquote(data))
+        self.transform = lambda data: six.moves.urllib.parse.quote(base64.b64encode(data))
+        self.transform_r = lambda data: base64.b64decode(six.moves.urllib.parse.unquote(data))
         self.generate_python = lambda var: "%(var)s=urllib.quote(base64.b64encode(%(var)s))\n" % {"var":var}
         self.generate_python_r = lambda var: "%(var)s=base64.b64decode(urllib.unquote(%(var)s))\n" % {"var":var}
         self.generate_powershell = lambda var: "Add-Type -AssemblyName System.Web;%(var)s=[System.Web.HttpUtility]::UrlEncode([System.Convert]::ToBase64string([System.Text.Encoding]::Default.GetBytes(%(var)s)));" % {"var":var}
@@ -211,7 +213,7 @@ class Transform(MalleableObject):
             MalleableError: If `key` is null or empty.
         """
         if not key:
-            MalleableError.throw(Transform.__class__, "mask", "key argument must not be empty")
+            MalleableError.throw(Transform.__class__("mask").with_traceback("key argument must not be empty"))
         self.transform = lambda data: "".join([chr(ord(c)^ord(key[0])) for c in data])
         self.transform_r = self.transform
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(f_ord(_)^%(key)s) for _ in %(var)s])\n" % {"key":ord(key[0]), "var":var}
@@ -249,7 +251,7 @@ class Transform(MalleableObject):
             MalleableError: If `string` is null.
         """
         if string is None:
-            MalleableError.throw(Transform.__class__, "prepend", "string argument must not be null")
+            MalleableError.throw(Transform.__class__("prepend").with_traceback("string argument must not be null"))
         self.transform = lambda data: string + data
         self.transform_r = lambda data: data[len(string):]
         self.generate_python = lambda var: "%(var)s=b'%(string)s'+%(var)s\n" % {"var":var, "string":string}
@@ -301,10 +303,10 @@ class Terminator(MalleableObject):
         Returns:
             dict (str, obj)
         """
-        return dict(super(Terminator, self)._serialize().items() + {
+        return dict(list(super(Terminator, self)._serialize().items()) + list({
             "type" : self.type,
             "arg" : self.arg
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
@@ -372,10 +374,10 @@ class Container(MalleableObject):
         Returns:
             dict (str, obj): Serialized data (json)
         """
-        return dict(super(Container, self)._serialize().items() + {
+        return dict(list(super(Container, self)._serialize().items()) + list({
             "transforms" : [t._serialize() for t in self.transforms],
             "terminator" : self.terminator._serialize()
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
@@ -488,7 +490,7 @@ class Container(MalleableObject):
             MalleableError: If `header` is empty.
         """
         if not header:
-            MalleableError.throw(Container, "header", "argument must not be null")
+            MalleableError.throw(Container("header").with_traceback("argument must not be null"))
         self.terminator = Terminator(type=Terminator.HEADER, arg=header)
 
     def parameter(self, parameter):
@@ -501,7 +503,7 @@ class Container(MalleableObject):
             MalleableError: If `parameter` is empty.
         """
         if not parameter:
-            MalleableError.throw(Container, "parameter", "argument must not be null")
+            MalleableError.throw(Container("parameter").with_traceback("argument must not be null"))
         self.terminator = Terminator(type=Terminator.PARAMETER, arg=parameter)
 
     def uriappend(self):
@@ -550,7 +552,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container, "generate_python", "var must not be empty")
+            MalleableError.throw(Container("generate_python").with_traceback("var must not be empty"))
         code = ""
         for t in self.transforms:
             code += t.generate_python(var)
@@ -570,7 +572,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container, "generate_python_r", "var must not be empty")
+            MalleableError.throw(Container("generate_python_r").with_traceback("var must not be empty"))
         code = ""
         for t in self.transforms[::-1]:
             code += t.generate_python_r(var)
@@ -590,7 +592,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container, "generate_powershell", "var must not be empty")
+            MalleableError.throw(Container("generate_powershell").with_traceback("var must not be empty"))
         code = ""
         for t in self.transforms:
             code += t.generate_powershell(var)
@@ -610,7 +612,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container, "generate_powershell_r", "var must not be empty")
+            MalleableError.throw(Container("generate_powershell_r").with_traceback("var must not be empty"))
         code = ""
         for t in self.transforms[::-1]:
             code += t.generate_powershell_r(var)

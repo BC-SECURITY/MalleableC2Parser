@@ -1,8 +1,10 @@
-import urllib
+from __future__ import absolute_import
+import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 from pyparsing import *
-from utility import MalleableError, MalleableUtil, MalleableObject
-from transformation import Transform, Terminator, Container
-from transaction import MalleableRequest, MalleableResponse, Transaction
+from .utility import MalleableError, MalleableUtil, MalleableObject
+from .transformation import Transform, Terminator, Container
+from .transaction import MalleableRequest, MalleableResponse, Transaction
+from six.moves import range
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # IMPLEMENTATION
@@ -46,15 +48,15 @@ class Get(Transaction):
             dict (str, obj)
         """
         d = super(Get, self)._serialize()
-        d["client"] = dict((d["client"].items() if "client" in d else []) + {
+        d["client"] = dict((list(d["client"].items()) if "client" in d else []) + list({
             "metadata" : self.client.metadata._serialize()
-        }.items())
-        d["server"] = dict((d["server"].items() if "server" in d else []) + {
+        }.items()))
+        d["server"] = dict((list(d["server"].items()) if "server" in d else []) + list({
             "output" : self.server.output._serialize()
-        }.items())
-        return dict(d.items() + {
+        }.items()))
+        return dict(list(d.items()) + list({
 
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
@@ -204,16 +206,16 @@ class Post(Transaction):
             dict (str, obj)
         """
         d = super(Post, self)._serialize()
-        d["client"] = dict((d["client"].items() if "client" in d else []) + {
+        d["client"] = dict((list(d["client"].items()) if "client" in d else []) + list({
             "id" : self.client.id._serialize(),
             "output" : self.client.output._serialize()
-        }.items())
-        d["server"] = dict((d["server"].items() if "server" in d else []) + {
+        }.items()))
+        d["server"] = dict((list(d["server"].items()) if "server" in d else []) + list({
             "output" : self.server.output._serialize()
-        }.items())
-        return dict(d.items() + {
+        }.items()))
+        return dict(list(d.items()) + list({
 
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
@@ -367,15 +369,15 @@ class Stager(Transaction):
             dict (str, obj)
         """
         d = super(Stager, self)._serialize()
-        d["client"] = dict((d["client"].items() if "client" in d else []) + {
+        d["client"] = dict((list(d["client"].items()) if "client" in d else []) + list({
             "metadata" : self.client.metadata._serialize()
-        }.items())
-        d["server"] = dict((d["server"].items() if "server" in d else []) + {
+        }.items()))
+        d["server"] = dict((list(d["server"].items()) if "server" in d else []) + list({
             "output" : self.server.output._serialize()
-        }.items())
-        return dict(d.items() + {
+        }.items()))
+        return dict(list(d.items()) + list({
 
-        }.items())
+        }.items()))
 
     @classmethod
     def _deserialize(cls, data):
