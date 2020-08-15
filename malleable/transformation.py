@@ -252,7 +252,7 @@ class Transform(MalleableObject):
         """
         if string is None:
             MalleableError.throw(Transform.__class__("prepend").with_traceback("string argument must not be null"))
-        self.transform = lambda data: string + data
+        self.transform = lambda data: string + data if isinstance(data, str) else string + data.decode('UTF-8')
         self.transform_r = lambda data: data[len(string):]
         self.generate_python = lambda var: "%(var)s=b'%(string)s'+%(var)s\n" % {"var":var, "string":string}
         self.generate_python_r = lambda var: "%(var)s=%(var)s[%(len)i:]\n" % {"var":var, "len":len(string)}
