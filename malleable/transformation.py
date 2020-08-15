@@ -176,7 +176,7 @@ class Transform(MalleableObject):
             MalleableError: If `string` is null.
         """
         if string is None:
-            MalleableError.throw(Transform.__class__("append").with_traceback("string argument must not be null"))
+            MalleableError.throw(Transform.__class__, "append", "string argument must not be null")
         self.transform = lambda data: data + string
         self.transform_r = lambda data: data[:-len(string)]
         self.generate_python = lambda var: "%(var)s+=b'%(string)s'\n" % {"var":var, "string":string}
@@ -213,7 +213,7 @@ class Transform(MalleableObject):
             MalleableError: If `key` is null or empty.
         """
         if not key:
-            MalleableError.throw(Transform.__class__("mask").with_traceback("key argument must not be empty"))
+            MalleableError.throw(Transform.__class__, "mask", "key argument must not be empty")
         self.transform = lambda data: "".join([chr(ord(c)^ord(key[0])) for c in data])
         self.transform_r = self.transform
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(f_ord(_)^%(key)s) for _ in %(var)s])\n" % {"key":ord(key[0]), "var":var}
@@ -251,7 +251,7 @@ class Transform(MalleableObject):
             MalleableError: If `string` is null.
         """
         if string is None:
-            MalleableError.throw(Transform.__class__("prepend").with_traceback("string argument must not be null"))
+            MalleableError.throw(Transform.__class__, "prepend", "string argument must not be null")
         self.transform = lambda data: string + data if isinstance(data, str) else string + data.decode('UTF-8')
         self.transform_r = lambda data: data[len(string):]
         self.generate_python = lambda var: "%(var)s=b'%(string)s'+%(var)s\n" % {"var":var, "string":string}
@@ -490,7 +490,7 @@ class Container(MalleableObject):
             MalleableError: If `header` is empty.
         """
         if not header:
-            MalleableError.throw(Container("header").with_traceback("argument must not be null"))
+            MalleableError.throw(Container, "header", "argument must not be null")
         self.terminator = Terminator(type=Terminator.HEADER, arg=header)
 
     def parameter(self, parameter):
@@ -503,7 +503,7 @@ class Container(MalleableObject):
             MalleableError: If `parameter` is empty.
         """
         if not parameter:
-            MalleableError.throw(Container("parameter").with_traceback("argument must not be null"))
+            MalleableError.throw(Container, "parameter", "argument must not be null")
         self.terminator = Terminator(type=Terminator.PARAMETER, arg=parameter)
 
     def uriappend(self):
@@ -552,7 +552,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container("generate_python").with_traceback("var must not be empty"))
+            MalleableError.throw(Container, "generate_python", "var must not be empty")
         code = ""
         for t in self.transforms:
             code += t.generate_python(var)
@@ -572,7 +572,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container("generate_python_r").with_traceback("var must not be empty"))
+            MalleableError.throw(Container, "generate_python_r", "var must not be empty")
         code = ""
         for t in self.transforms[::-1]:
             code += t.generate_python_r(var)
@@ -592,7 +592,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container("generate_powershell").with_traceback("var must not be empty"))
+            MalleableError.throw(Container, "generate_powershell", "var must not be empty")
         code = ""
         for t in self.transforms:
             code += t.generate_powershell(var)
@@ -612,7 +612,7 @@ class Container(MalleableObject):
             MalleableError: If `var` is empty.
         """
         if not var:
-            MalleableError.throw(Container("generate_powershell_r").with_traceback("var must not be empty"))
+            MalleableError.throw(Container, "generate_powershell_r", "var must not be empty")
         code = ""
         for t in self.transforms[::-1]:
             code += t.generate_powershell_r(var)

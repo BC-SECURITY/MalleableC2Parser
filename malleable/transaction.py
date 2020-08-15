@@ -174,7 +174,7 @@ class MalleableRequest(MalleableObject):
         """
         if "://" in url:
             if "http://" not in url.lower() and "https://" not in url.lower():
-                MalleableError.throw(self.__class__("url").with_traceback("Scheme not supported: %s" % url))
+                MalleableError.throw(self.__class__, "url", "Scheme not supported: %s" % url)
         else:
             url = "http://" + url
         self._url = six.moves.urllib.parse.urlsplit(url)
@@ -242,7 +242,7 @@ class MalleableRequest(MalleableObject):
                 host = host.lstrip("https://")
                 self.scheme = "https"
             else:
-                MalleableError.throw(self.__class__("host").with_traceback("Scheme not supported: %s" % host))
+                MalleableError.throw(self.__class__, "host", "Scheme not supported: %s" % host)
         if ":" not in host and self._url.port:
             host += ":" + str(self._url.port)
         self._url = self._url._replace(netloc=host)

@@ -22,7 +22,7 @@ class MalleableError(Exception):
         Raises:
             MalleableError: When called.
         """
-        raise cls
+        raise(cls("%s::%s - %s" % (clss.__name__, func, message)))
 
 class MalleableUtil(object):
     """Custom utility class used to provide helper functionality."""

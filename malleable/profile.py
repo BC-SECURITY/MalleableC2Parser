@@ -83,7 +83,7 @@ class Profile(MalleableObject):
                 profile.sleeptime = int(data["sleeptime"]) if "sleeptime" in data else 60000
                 profile.jitter = int(data["jitter"]) if "jitter" in data else 0
             except Exception as e:
-                MalleableError.throw(cls("_deserialize").with_traceback("An error occurred: " + str(e)))
+                MalleableError.throw(cls, "_deserialize", "An error occurred: " + str(e))
         return profile
 
     @classmethod
@@ -163,14 +163,14 @@ class Profile(MalleableObject):
             clone.headers = test.headers
             clone.body = test.body
             if self.get.extract_client(clone) != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-get-client-metadata" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-get-client-metadata" % format)
 
             test = p.get.construct_server(data)
             clone = MalleableResponse()
             clone.headers = test.headers
             clone.body = test.body
             if self.get.extract_server(clone) != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-get-server-output" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-get-server-output" % format)
 
             test = p.post.construct_client(host, data, data)
             clone = MalleableRequest()
@@ -180,16 +180,16 @@ class Profile(MalleableObject):
             clone.body = test.body
             id, output = self.post.extract_client(clone)
             if id != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-post-client-id" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-post-client-id" % format)
             if output != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-post-client-output" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-post-client-output" % format)
 
             test = p.post.construct_server(data)
             clone = MalleableResponse()
             clone.headers = test.headers
             clone.body = test.body
             if self.post.extract_server(clone) != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-post-server-output" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-post-server-output" % format)
 
             test = p.stager.construct_client(host, data)
             clone = MalleableRequest()
@@ -198,14 +198,14 @@ class Profile(MalleableObject):
             clone.headers = test.headers
             clone.body = test.body
             if self.stager.extract_client(clone) != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-stager-client-metadata" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-stager-client-metadata" % format)
 
             test = p.stager.construct_server(data)
             clone = MalleableResponse()
             clone.headers = test.headers
             clone.body = test.body
             if self.stager.extract_server(clone) != data:
-                MalleableError.throw(self.__class__("validate").with_traceback("Data-integrity check failed: %s-stager-server-output" % format))
+                MalleableError.throw(self.__class__, "validate", "Data-integrity check failed: %s-stager-server-output" % format)
 
         if set(self.get.client.uris).intersection(set(self.post.client.uris)) or \
             set(self.post.client.uris).intersection(set(self.stager.client.uris)) or \
@@ -219,11 +219,11 @@ class Profile(MalleableObject):
             ("/" in self.post.client.uris and len(self.get.client.uris) == 0) or \
             ("/" in self.stager.client.uris and len(self.get.client.uris) == 0) or \
             ("/" in self.stager.client.uris and len(self.post.client.uris) == 0):
-            MalleableError.throw(self.__class__("validate").with_traceback("Cannot have duplicate uris: %s - %s - %s" % (
+            MalleableError.throw(self.__class__, "validate", "Cannot have duplicate uris: %s - %s - %s" % (
                 self.get.client.uris if self.get.client.uris else ["/"],
                 self.post.client.uris if self.post.client.uris else ["/"],
                 self.stager.client.uris if self.stager.client.uris else ["/"]
-            )))
+            ))
 
         return True
 
@@ -234,13 +234,13 @@ class Profile(MalleableObject):
             file (str): Filename to be read and parsed.
         """
         if not file or not os.path.isfile(file):
-            MalleableError.throw(self.__class__("ingest").with_traceback("Invalid file: %s" % str(file)))
+            MalleableError.throw(self.__class__, "ingest", "Invalid file: %s" % str(file))
 
         content = None
         with open(file) as f:
             content = f.read()
 
         if not content:
-            MalleableError.throw(self.__class__("ingest").with_traceback("Empty file: %s" % str(file)))
+            MalleableError.throw(self.__class__, "ingest", "Empty file: %s" % str(file))
 
         self._parse(self._pattern().searchString(content))
