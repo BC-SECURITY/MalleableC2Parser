@@ -153,7 +153,7 @@ class Profile(MalleableObject):
             MalleableError: If a check fails.
         """
         host = "http://domain.com:80"
-        data = string.printable
+        #data = string.printable
         data = string.printable.encode('UTF-8')
         for format, p in [("base", self), ("clone", self._clone()), ("serialized", Profile._deserialize(self._serialize()))]:
             test = p.get.construct_client(host, data)

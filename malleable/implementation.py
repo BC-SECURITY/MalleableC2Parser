@@ -140,6 +140,8 @@ class Get(Transaction):
                 metadata = request.extract(self.client, self.client.metadata.terminator)
                 if metadata:
                     m = self.client.metadata.transform_r(metadata)
+                    if isinstance(m, str):
+                        m = m.encode("UTF-8")
                     return m
         return None
 

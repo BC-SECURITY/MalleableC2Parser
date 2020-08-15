@@ -158,7 +158,10 @@ class MalleableRequest(MalleableObject):
         Returns:
             str: url
         """
-        return six.moves.urllib.parse.urlunsplit(self._url) + self.extra
+        extra = self.extra
+        if isinstance(extra, bytes):
+            extra = extra.decode("UTF-8")
+        return six.moves.urllib.parse.urlunsplit(self._url) + extra
 
     @url.setter
     def url(self, url):
