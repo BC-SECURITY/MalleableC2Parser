@@ -234,8 +234,8 @@ class Transform(MalleableObject):
     def _netbiosu(self):
         """Configure the `netbiosu` Transform, which encodes an arbitrary input using the upper-case
         netbios algorithm."""
-        self.transform = lambda data: "".join([chr((c>>4)+0x41)+chr((c&0xF)+0x41) for c in data])
-        self.transform_r = lambda data: "".join([chr(((ord(data[i])-0x41)<<4)|((ord(data[i+1])-0x41)&0xF)) for i in range(0, len(data), 2)])
+        self.transform = lambda data: "".join([chr((ord(c)>>4)+0x41)+chr((ord(c)&0xF)+0x41) for c in data]) if isinstance(data, str) else "".join([chr((c>>4)+0x41)+chr((c&0xF)+0x41) for c in data])
+        self.transform_r = lambda data: "".join([chr(((ord(data.decode('UTF-8')[i])-0x41)<<4)|((ord(data.decode("UTF-8")[i+1])-0x41)&0xF)) for i in range(0, len(data), 2)]) if isinstance(data, bytes) else "".join([chr(((ord(data[i])-0x41)<<4)|((ord(data[i+1])-0x41)&0xF)) for i in range(0, len(data), 2)])
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr((f_ord(_)>>4)+0x41)+chr((f_ord(_)&0xF)+0x41) for _ in %(var)s])\n" % {"var":var}
         self.generate_python_r = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(((f_ord(%(var)s[_])-0x41)<<4)|((f_ord(%(var)s[_+1])-0x41)&0xF)) for _ in range(0,len(%(var)s),2)])\n" % {"var":var}
         self.generate_powershell = lambda var: "%(var)s=[System.Text.Encoding]::Default.GetString($(for($_=0;$_ -lt %(var)s.length;$_++){([System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -shr 4)+65;([System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -band 15)+65;}));" % {"var":var}

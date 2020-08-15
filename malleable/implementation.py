@@ -305,8 +305,11 @@ class Post(Transaction):
             if u.lower() in request.path.lower():
                 id = request.extract(self.client, self.client.id.terminator).encode('UTF-8')
                 output = request.extract(self.client, self.client.output.terminator)
+                trans_r = self.client.id.transform_r(id) if id else None
+                if isinstance(trans_r, str):
+                    trans_r = trans_r.encode("UTF-8")
                 return (
-                    self.client.id.transform_r(id) if id else None,
+                    trans_r,
                     self.client.output.transform_r(output) if output else None
                 )
         return (None, None)

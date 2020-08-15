@@ -1,61 +1,74 @@
-# APT1 VIRTUALLYTHERE SSL
 #
-# Reference: Mandiant's APT1 Report
-#	     Digital Appendx F - SSL Certificates
-#            http://intelreport.mandiant.com/
+# Comfoo profile
+#   http://www.secureworks.com/cyber-threat-intelligence/threats/secrets-of-the-comfoo-masters/
 #
-# Author: @armitagehacker
-set sample_name "APT1 Virtually There Malware";
+# Author: @harmj0y
+#
 
-# this is the certificate
-https-certificate {
-	set C	"US";
-	set ST	"Some-State";
-	set O	"www.virtuallythere.com";
-	set OU	"new";
-	set CN	"new";
-}
+set sleeptime "30000"; # use a ~30s delay between callbacks
+set jitter    "20";
+set maxdns    "255";
+set useragent "Mozilla/4.0 (compatible; MSIE 6.0;Windows NT 5.1)";
 
-# since *cough* presumably you're using an HTTPS Beacon...
 http-get {
-	set uri "/zOMGAPT";
 
-	client {
-		metadata {
-			netbiosu;
-			parameter "tmp";
-		}
-	}
+    set uri "/CWoNaJLBo/VTNeWw11212/";
 
-	server {
-		header "Content-Type" "application/octet-stream";
+    client {
 
-		output {
-			print;
-		}
-	}
+        header "Accept" "image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*";
+        header "Accept-Language" "en-en";
+        header "Connection" "Keel-Alive";
+        header "Cache-Control" "no-cache";
+
+        metadata {
+            netbiosu;
+            append "/UTWOqVQ132/";
+            uri-append;
+        }
+    }
+
+    server {
+
+        header "Server" "Apache/2.0.50 (Unix)";
+        header "Keep-Alive" "timeout=15, max=90";
+
+        output {
+            print;
+        }
+    }
 }
 
 http-post {
-	set uri "/BUYTHEAPTDETECTORNOW";
 
-	client {
-		header "Content-Type" "application/octet-stream";
+    set uri "/CWoNaJLBo/VTNeWw11213/";
 
-		id {
-			uri-append;
-		}
+    client {
 
-		output {
-			print;
-		}
-	}
+        header "Accept" "image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*";
+        header "Accept-Language" "en-en";
+        header "Connection" "Keel-Alive";
+        header "Cache-Control" "no-cache";
 
-	server {
-		header "Content-Type" "text/html";
+        id {
+            netbiosu;
+            append "/UTWOqVQ132/";
+            uri-append;
+        }
 
-		output {
-			print;
-		}
-	}
+        output {
+            print;
+        }
+    }
+
+    server {
+
+        header "Server" "Apache/2.0.50 (Unix)";
+        header "Keep-Alive" "timeout=15, max=90";
+
+        output {
+            base64;
+            print;
+        }
+    }
 }
