@@ -177,7 +177,8 @@ class Transform(MalleableObject):
         """
         if string is None:
             MalleableError.throw(Transform.__class__, "append", "string argument must not be null")
-        self.transform = lambda data: data + string
+        self.transform = lambda data: data + string if isinstance(data, str) else data.decode('UTF-8') + string
+        #self.transform = lambda data: data + string if isinstance(data, str) else data + string.encode('UTF-8')
         self.transform_r = lambda data: data[:-len(string)]
         self.generate_python = lambda var: "%(var)s+=b'%(string)s'\n" % {"var":var, "string":string}
         self.generate_python_r = lambda var: "%(var)s=%(var)s[:-%(len)i]\n" % {"var":var, "len":len(string)}
@@ -224,8 +225,8 @@ class Transform(MalleableObject):
     def _netbios(self):
         """Configure the `netbios` Transform, which encodes an arbitrary input using the lower-case
         netbios algorithm."""
-        self.transform = lambda data: "".join([chr((ord(c)>>4)+0x61)+chr((ord(c)&0xF)+0x61) for c in data])
-        self.transform_r = lambda data: "".join([chr(((ord(data[i])-0x61)<<4)|((ord(data[i+1])-0x61)&0xF)) for i in range(0, len(data), 2)])
+        self.transform = lambda data: "".join([chr((ord(c)>>4)+0x61)+chr((ord(c)&0xF)+0x61) for c in data]) if isinstance(data, str) else "".join([chr((c>>4)+0x61)+chr((c&0xF)+0x61) for c in data])
+        self.transform_r = lambda data: "".join([chr(((ord(data.decode('UTF-8')[i])-0x61)<<4)|((ord(data.decode('UTF-8')[i+1])-0x61)&0xF)) for i in range(0, len(data), 2)]) if isinstance(data, bytes) else "".join([chr(((ord(data[i])-0x61)<<4)|((ord(data[i+1])-0x61)&0xF)) for i in range(0, len(data), 2)])
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr((f_ord(_)>>4)+0x61)+chr((f_ord(_)&0xF)+0x61) for _ in %(var)s])\n" % {"var":var}
         self.generate_python_r = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(((f_ord(%(var)s[_])-0x61)<<4)|((f_ord(%(var)s[_+1])-0x61)&0xF)) for _ in range(0,len(%(var)s),2)])\n" % {"var":var}
         self.generate_powershell = lambda var: "%(var)s=[System.Text.Encoding]::Default.GetString($(for($_=0;$_ -lt %(var)s.length;$_++){([System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -shr 4)+97;([System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -band 15)+97;}));" % {"var":var}
@@ -534,6 +535,8 @@ class Container(MalleableObject):
             str: The reverse-transformed data.
         """
         if data is None: data = ""
+        if isinstance(data, str):
+            data = data.encode("UTF-8")
         for t in self.transforms[::-1]:
             data = t.transform_r(data)
         return data
