@@ -5,7 +5,7 @@ from malleable.utility import MalleableError
 
 try:
     p = malleable.Profile()
-    p.ingest("./Profiles/taidoor.profile")
+    p.ingest("havex.profile")
     #p.ingest("putter.profile")
     if p.validate():
         request = p.get.construct_client("mydomain.sample", "mydata")
