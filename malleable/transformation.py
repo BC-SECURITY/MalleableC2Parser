@@ -197,7 +197,7 @@ class Transform(MalleableObject):
     def _base64url(self):
         """Configure the `base64url` Transform, which base64 encodes an arbitary input using url-safe characters."""
         self.transform = lambda data: six.moves.urllib.parse.quote(base64.b64encode(data))
-        self.transform_r = lambda data: base64.b64decode(six.moves.urllib.parse.unquote(data))
+        self.transform_r = lambda data: base64.b64decode(six.moves.urllib.parse.unquote(data)) if isinstance(data, str) else base64.b64decode(six.moves.urllib.parse.unquote(data.decode('UTF-8')))
         self.generate_python = lambda var: "%(var)s=urllib.quote(base64.b64encode(%(var)s))\n" % {"var":var}
         self.generate_python_r = lambda var: "%(var)s=base64.b64decode(urllib.unquote(%(var)s))\n" % {"var":var}
         self.generate_powershell = lambda var: "Add-Type -AssemblyName System.Web;%(var)s=[System.Web.HttpUtility]::UrlEncode([System.Convert]::ToBase64string([System.Text.Encoding]::Default.GetBytes(%(var)s)));" % {"var":var}
