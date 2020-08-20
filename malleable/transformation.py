@@ -215,7 +215,7 @@ class Transform(MalleableObject):
         """
         if not key:
             MalleableError.throw(Transform.__class__, "mask", "key argument must not be empty")
-        self.transform = lambda data: "".join([chr(ord(c)^ord(key[0])) for c in data])
+        self.transform = lambda data: "".join([chr(ord(c)^key[0]) for c in data]) if isinstance(data, str) else "".join([chr(c^key[0]) for c in data])
         self.transform_r = self.transform
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(f_ord(_)^%(key)s) for _ in %(var)s])\n" % {"key":ord(key[0]), "var":var}
         self.generate_python_r = self.generate_python

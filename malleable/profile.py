@@ -78,8 +78,8 @@ class Profile(MalleableObject):
         if data:
             try:
                 profile.get = Get._deserialize(data["get"]) if "get" in data else Get()
-                profile.post = Post._deserialize(data["post"] if "post" in data else Post())
-                profile.stager = Stager._deserialize(data["stager"] if "stager" in data else Stager())
+                profile.post = Post._deserialize(data["post"]) if "post" in data else Post()
+                profile.stager = Stager._deserialize(data["stager"]) if "stager" in data else Stager()
                 profile.sleeptime = int(data["sleeptime"]) if "sleeptime" in data else 60000
                 profile.jitter = int(data["jitter"]) if "jitter" in data else 0
             except Exception as e:
