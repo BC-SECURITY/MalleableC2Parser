@@ -178,8 +178,7 @@ class Transform(MalleableObject):
         if string is None:
             MalleableError.throw(Transform.__class__, "append", "string argument must not be null")
         self.transform = lambda data: data + string if isinstance(data, str) else data.decode('UTF-8') + string
-        #self.transform = lambda data: data + string if isinstance(data, str) else data + string.encode('UTF-8')
-        self.transform_r = lambda data: data[:-len(string)]
+        self.transform_r = lambda data: data[:-len(string)] if isinstance(data, bytes) else data[:-len(string)].encode('UTF-8')
         self.generate_python = lambda var: "%(var)s+=b'%(string)s'\n" % {"var":var, "string":string}
         self.generate_python_r = lambda var: "%(var)s=%(var)s[:-%(len)i]\n" % {"var":var, "len":len(string)}
         self.generate_powershell = lambda var: "%(var)s+='%(string)s';" % {"var":var, "string":string}
@@ -213,6 +212,10 @@ class Transform(MalleableObject):
         Raises:
             MalleableError: If `key` is null or empty.
         """
+        if isinstance(key, str):
+            key = bytearray.fromhex(key).decode()
+            key = key.encode('UTF-8')
+
         if not key:
             MalleableError.throw(Transform.__class__, "mask", "key argument must not be empty")
         self.transform = lambda data: "".join([chr(ord(c)^key[0]) for c in data]) if isinstance(data, str) else "".join([chr(c^key[0]) for c in data])
@@ -254,7 +257,7 @@ class Transform(MalleableObject):
         if string is None:
             MalleableError.throw(Transform.__class__, "prepend", "string argument must not be null")
         self.transform = lambda data: string + data if isinstance(data, str) else string + data.decode('UTF-8')
-        self.transform_r = lambda data: data[len(string):]
+        self.transform_r = lambda data: data[len(string):] if isinstance(data, bytes) else data.encode("UTF-8")[len(string):]
         self.generate_python = lambda var: "%(var)s=b'%(string)s'+%(var)s\n" % {"var":var, "string":string}
         self.generate_python_r = lambda var: "%(var)s=%(var)s[%(len)i:]\n" % {"var":var, "len":len(string)}
         self.generate_powershell = lambda var: "%(var)s='%(string)s'+%(var)s;" % {"var":var, "string":string}
@@ -521,6 +524,8 @@ class Container(MalleableObject):
             str: The transformed data.
         """
         if data is None: data = ""
+        if isinstance(data, str):
+            data = data.encode("UTF-8")
         for t in self.transforms:
             data = t.transform(data)
         return data
