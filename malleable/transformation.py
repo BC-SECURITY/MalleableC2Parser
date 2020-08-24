@@ -247,7 +247,7 @@ class Transform(MalleableObject):
         self.transform_r = self.transform
         self.generate_python = lambda var: "f_ord=ord if __import__('sys').version_info[0]<3 else int;%(var)s=''.join([chr(f_ord(_)^%(key)s) for _ in %(var)s])\n" % {"key":ord(key[0]), "var":var}
         self.generate_python_r = self.generate_python
-        self.generate_powershell = lambda var: "%(var)s=[System.Text.Encoding]::Default.GetString($(for($_=0;$_ -lt %(var)s.length;$_++){[System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -bxor %(key)s}));" % {"key":ord(key[0]), "var":var}
+        self.generate_powershell = lambda var: "%(var)s=[System.Text.Encoding]::Default.GetString($(for($_=0;$_ -lt %(var)s.length;$_++){[System.Text.Encoding]::Default.GetBytes(%(var)s)[$_] -bxor %(key)s}));" % {"key":key[0], "var":var}
         self.generate_powershell_r = self.generate_powershell
 
     def _netbios(self):
