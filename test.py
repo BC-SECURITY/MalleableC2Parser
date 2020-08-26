@@ -5,8 +5,8 @@ from malleable.utility import MalleableError
 
 try:
     p = malleable.Profile()
-    p.ingest("./Profiles/randomized.profile")
-    #p.ingest("putter.profile")
+    #p.ingest("./Profiles/amazon.profile")
+    p.ingest("globeimposter.profile")
     if p.validate():
         request = p.get.construct_client("mydomain.sample", "mydatata")
         print(request.url, request.headers, request.body)

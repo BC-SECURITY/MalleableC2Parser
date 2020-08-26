@@ -403,27 +403,27 @@ class MalleableRequest(MalleableObject):
         data = None
         if terminator.type == Terminator.HEADER:
             data = self.get_header(terminator.arg)
-            if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('UTF-8')
+            if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('Latin-1')
         elif terminator.type == Terminator.PARAMETER:
             data = self.get_parameter(terminator.arg)
-            if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('UTF-8')
+            if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('Latin-1')
         elif terminator.type == Terminator.URIAPPEND:
             if self.extra:
-                data = six.moves.urllib.parse.unquote_to_bytes(self.extra).decode('UTF-8')
+                data = six.moves.urllib.parse.unquote_to_bytes(self.extra).decode('Latin-1')
             elif original.parameters:
                 for p in sorted(original.parameters, key=len, reverse=True):
                     known = original.parameters[p]
                     shown = self.get_parameter(p)
                     if shown and known.lower() in shown.lower() and len(shown) > len(known):
                         data = known.split(known)[-1]
-                        if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('UTF-8')
+                        if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('Latin-1')
                         break
             else:
                 for known in sorted(original.uris, key=len, reverse=True):
                     shown = self.path
                     if known.lower() in shown.lower() and len(shown) > len(known):
                         data = shown.split(known)[-1]
-                        if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('UTF-8')
+                        if data: data = six.moves.urllib.parse.unquote_to_bytes(data).decode('Latin-1')
                         break
         elif terminator.type == Terminator.PRINT: data = self.body
         return data
