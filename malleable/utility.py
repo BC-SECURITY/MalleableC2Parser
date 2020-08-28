@@ -1,4 +1,6 @@
+from __future__ import absolute_import
 from pyparsing import *
+import binascii
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # UTILITY
@@ -21,7 +23,8 @@ class MalleableError(Exception):
         Raises:
             MalleableError: When called.
         """
-        raise(cls("%s::%s - %s" % (clss.__name__, func, message)))
+        raise (cls("%s::%s - %s" % (clss.__name__, func, message)))
+
 
 class MalleableUtil(object):
     """Custom utility class used to provide helper functionality."""
@@ -36,7 +39,10 @@ class MalleableUtil(object):
         Returns:
             str: Byte as a hex character.
         """
-        return hex(ord(byte)) if byte else None
+        if isinstance(byte, str):
+            byte = int(byte)
+        return_hex = bytes([byte]).hex()
+        return return_hex if byte else None
 
     @staticmethod
     def from_hex(hex):
@@ -48,11 +54,17 @@ class MalleableUtil(object):
         Returns:
             char: byte.
         """
-        return hex.split("0x")[-1].zfill(2).decode("hex") if hex else None
+        if isinstance(hex, bytes):
+            hex = hex.decode('latin-1')
+        if hex:
+            r = bytes.fromhex(hex)
+        else:
+            r = None
+        return r
 
 class MalleableObject(object):
     """Custom object class used to implement consistent functionality."""
-    
+
     SEMICOLON = Suppress(";")
     FIELD = Word(alphanums + "_-")
     VALUE = (QuotedString("\"", escChar="\\") | QuotedString("'", escChar="\\"))
