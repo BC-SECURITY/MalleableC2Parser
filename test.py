@@ -5,8 +5,7 @@ from malleable.utility import MalleableError
 
 try:
     p = malleable.Profile()
-    #p.ingest("./Profiles/amazon.profile")
-    p.ingest("apt1.profile")
+    p.ingest("./amazon.profile")
     if p.validate():
         request = p.get.construct_client("mydomain.sample", "mydatata")
         print(request.url, request.headers, request.body)
