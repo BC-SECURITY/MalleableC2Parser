@@ -1,4 +1,8 @@
 from __future__ import absolute_import
+
+import random
+import string
+
 import six.moves.urllib.request, six.moves.urllib.parse, six.moves.urllib.error
 from pyparsing import *
 from .utility import MalleableError, MalleableUtil, MalleableObject
@@ -141,7 +145,7 @@ class Get(Transaction):
                 if metadata:
                     m = self.client.metadata.transform_r(metadata)
                     if isinstance(m, str):
-                        m = m.encode("UTF-8")
+                        m = m.encode("latin-1")
                     return m
         return None
 
@@ -305,11 +309,11 @@ class Post(Transaction):
             if u.lower() in request.path.lower():
                 id = request.extract(self.client, self.client.id.terminator)
                 if isinstance(id, str):
-                    id = id.encode('UTF-8')
+                    id = id.encode('latin-1')
                 output = request.extract(self.client, self.client.output.terminator)
                 trans_r = self.client.id.transform_r(id) if id else None
                 if isinstance(trans_r, str):
-                    trans_r = trans_r.encode("UTF-8")
+                    trans_r = trans_r.encode("latin-1")
                 return (
                     trans_r,
                     self.client.output.transform_r(output) if output else None
@@ -356,6 +360,12 @@ class Stager(Transaction):
         self.client.metadata = Container()
         self.server.output = Container()
         self.client.verb = "GET"
+
+        # Having a missing http-stager and '/' in http-get or http-post throws an error
+        # This catches it and generates a random http-stager uri
+        if not self.client.uris:
+            self.client.uris = []
+            self.client.uris.append('/' + self.get_random_string(8) + '/')
 
     def _clone(self):
         """Deep copy of the Stager Transaction.
@@ -492,3 +502,8 @@ class Stager(Transaction):
         """
         output = response.extract(self.server, self.server.output.terminator)
         return self.server.output.transform_r(output) if output else None
+
+    def get_random_string(self, length):
+        letters = string.ascii_lowercase
+        result_str = ''.join(random.choice(letters) for i in range(length))
+        return result_str
